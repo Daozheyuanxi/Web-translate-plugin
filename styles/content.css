@@ -1,0 +1,158 @@
+/* ============================================
+   智译 - Content Script 注入样式
+   ============================================ */
+
+/* --- 翻译相关样式 --- */
+
+/* 已翻译文本的标记（可选的淡色底色） */
+.zhiyi-translated {
+  /* 半透明蓝色底色，柔和不刺眼 */
+}
+
+/* 翻译加载动画 */
+.zhiyi-loading {
+  position: relative;
+}
+
+.zhiyi-loading::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #4fc3f7, transparent);
+  animation: zhiyi-loading-bar 1.5s infinite;
+}
+
+@keyframes zhiyi-loading-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* --- 字幕相关样式 --- */
+
+#zhiyi-subtitle-container {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483647;
+  pointer-events: none;
+  width: 90%;
+  max-width: 800px;
+  text-align: center;
+  font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  transition: opacity 0.3s ease;
+}
+
+.zhiyi-subtitle-inner {
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 12px 24px;
+  max-width: 100%;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 英文字幕 */
+.zhiyi-subtitle-en {
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1.6;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  margin-bottom: 6px;
+  font-weight: 400;
+}
+
+/* 中文字幕 */
+.zhiyi-subtitle-zh {
+  color: #ffd54f;
+  font-size: 18px;
+  line-height: 1.6;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  font-weight: 500;
+}
+
+/* 字幕出现动画 */
+.zhiyi-subtitle-inner {
+  animation: zhiyi-subtitle-fade-in 0.3s ease-out;
+}
+
+@keyframes zhiyi-subtitle-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- 翻译进度浮层 --- */
+
+#zhiyi-progress-overlay {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 2147483647;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 16px 20px;
+  color: #e2e8f0;
+  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  font-size: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 200px;
+  animation: zhiyi-slide-in 0.3s ease-out;
+}
+
+@keyframes zhiyi-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+#zhiyi-progress-overlay .progress-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#zhiyi-progress-overlay .progress-bar-container {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+#zhiyi-progress-overlay .progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+#zhiyi-progress-overlay .progress-text {
+  font-size: 12px;
+  color: #64748b;
+}

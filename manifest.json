@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "智译 - 网页翻译 & 视频字幕",
+  "version": "1.0.0",
+  "description": "一键翻译网页文字为中文，为英文视频添加中英双语字幕。基于 Gemini AI。",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabCapture",
+    "scripting",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/translator.js", "content/subtitle.js"],
+      "css": ["styles/content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "options/options.html"
+}
