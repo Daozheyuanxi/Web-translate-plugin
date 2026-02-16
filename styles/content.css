@@ -26,11 +26,16 @@
 }
 
 @keyframes zhiyi-loading-bar {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
-/* --- 字幕相关样式 --- */
+/* --- 字幕相关样式（多行滚动） --- */
 
 #zhiyi-subtitle-container {
   position: absolute;
@@ -47,52 +52,157 @@
 }
 
 .zhiyi-subtitle-inner {
-  display: inline-block;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
   background: rgba(0, 0, 0, 0.78);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-radius: 12px;
-  padding: 12px 24px;
+  padding: 10px 20px;
   max-width: 100%;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* 每一行字幕 */
+.zhiyi-subtitle-line {
+  padding: 4px 0;
+  animation: zhiyi-line-in 0.3s ease-out;
+}
+
+.zhiyi-subtitle-line+.zhiyi-subtitle-line {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@keyframes zhiyi-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* 英文字幕 */
 .zhiyi-subtitle-en {
   color: #ffffff;
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.5;
   letter-spacing: 0.3px;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-  margin-bottom: 6px;
   font-weight: 400;
 }
 
 /* 中文字幕 */
 .zhiyi-subtitle-zh {
   color: #ffd54f;
-  font-size: 18px;
-  line-height: 1.6;
+  font-size: 17px;
+  line-height: 1.5;
   letter-spacing: 0.5px;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   font-weight: 500;
+  min-height: 1.5em;
 }
 
-/* 字幕出现动画 */
-.zhiyi-subtitle-inner {
-  animation: zhiyi-subtitle-fade-in 0.3s ease-out;
+/* 翻译中状态 */
+.zhiyi-subtitle-zh.zhiyi-translating {
+  color: rgba(255, 213, 79, 0.4);
+  font-size: 14px;
+  font-style: italic;
 }
 
-@keyframes zhiyi-subtitle-fade-in {
+/* 翻译完成动画 */
+.zhiyi-subtitle-zh.zhiyi-zh-ready {
+  animation: zhiyi-zh-pop 0.25s ease-out;
+}
+
+@keyframes zhiyi-zh-pop {
   from {
-    opacity: 0;
-    transform: translateY(10px);
+    opacity: 0.4;
+    transform: scale(0.96);
   }
+
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1);
   }
+}
+
+/* 临时识别文本（底部半透明） */
+.zhiyi-subtitle-interim {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  line-height: 1.5;
+  font-style: italic;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* --- 字幕翻译覆盖层（caption-translator 使用） --- */
+
+#zhiyi-caption-overlay {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483647;
+  pointer-events: none;
+  width: 90%;
+  max-width: 800px;
+  text-align: center;
+  font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+}
+
+.zhiyi-caption-inner {
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 10px 22px;
+  max-width: 100%;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: opacity 0.25s ease;
+}
+
+.zhiyi-caption-en {
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1.6;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  font-weight: 400;
+}
+
+.zhiyi-caption-zh {
+  color: #ffd54f;
+  font-size: 18px;
+  line-height: 1.6;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.zhiyi-caption-zh.zhiyi-translating {
+  color: rgba(255, 213, 79, 0.4);
+  font-size: 14px;
+  font-style: italic;
+}
+
+.zhiyi-caption-message {
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(8px);
+  border-radius: 10px;
+  padding: 8px 18px;
+  color: #94a3b8;
+  font-size: 13px;
+  margin-top: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* --- 翻译进度浮层 --- */
@@ -121,6 +231,7 @@
     opacity: 0;
     transform: translateX(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);

@@ -1,12 +1,15 @@
 /**
  * Popup 交互逻辑
+ * 三功能面板：网页翻译 / 字幕翻译 / 语音字幕
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
     // DOM 元素
     const translateBtn = document.getElementById('translateBtn');
+    const captionBtn = document.getElementById('captionBtn');
     const subtitleBtn = document.getElementById('subtitleBtn');
     const translateStatus = document.getElementById('translateStatus');
+    const captionStatus = document.getElementById('captionStatus');
     const subtitleStatus = document.getElementById('subtitleStatus');
     const settingsBtn = document.getElementById('settingsBtn');
     const goSettingsBtn = document.getElementById('goSettingsBtn');
@@ -18,9 +21,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 获取当前页面状态
     await updatePageStatus();
 
-    // --- 事件绑定 ---
+    // ====== 1. 网页翻译 ======
 
-    // 翻译按钮
     translateBtn.addEventListener('click', async () => {
         translateBtn.disabled = true;
         const btnText = translateBtn.querySelector('.btn-text');
@@ -28,24 +30,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-            if (!tab) {
-                showStatus(translateStatus, '未找到活动页面', 'error');
-                return;
-            }
+            if (!tab) { showStatus(translateStatus, '未找到活动页面', 'error'); return; }
 
             btnLoader.style.display = 'block';
 
-            const response = await chrome.tabs.sendMessage(tab.id, {
-                type: 'TOGGLE_TRANSLATE'
-            });
+            const response = await chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_TRANSLATE' });
 
             if (response.status === 'started') {
                 btnText.textContent = '翻译中...';
                 showStatus(translateStatus, `正在翻译 ${response.total || ''} 个文本...`, 'processing');
-
-                // 监听翻译完成
-                listenForProgress();
+                listenForTranslateProgress();
             } else if (response.status === 'restored') {
                 btnText.textContent = '翻译页面';
                 translateBtn.classList.remove('active');
@@ -69,7 +63,44 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // 字幕按钮
+    // ====== 2. 字幕翻译 ======
+
+    captionBtn.addEventListener('click', async () => {
+        captionBtn.disabled = true;
+        const btnText = captionBtn.querySelector('.btn-text');
+        const btnLoader = captionBtn.querySelector('.btn-loader');
+
+        try {
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (!tab) { showStatus(captionStatus, '未找到活动页面', 'error'); return; }
+
+            btnLoader.style.display = 'block';
+
+            const response = await chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_CAPTION_TRANSLATE' });
+
+            if (response.status === 'started') {
+                btnText.textContent = '关闭字幕';
+                captionBtn.classList.add('active');
+                showStatus(captionStatus, `正在翻译 ${response.total || ''} 条字幕...`, 'processing');
+                listenForCaptionProgress();
+            } else if (response.status === 'stopped') {
+                btnText.textContent = '翻译字幕';
+                captionBtn.classList.remove('active');
+                showStatus(captionStatus, '已关闭', '');
+            } else if (response.status === 'error') {
+                showStatus(captionStatus, response.message, 'error');
+            }
+        } catch (err) {
+            console.error('字幕翻译错误:', err);
+            showStatus(captionStatus, '请刷新页面后重试', 'error');
+        }
+
+        captionBtn.disabled = false;
+        btnLoader.style.display = 'none';
+    });
+
+    // ====== 3. 语音字幕 ======
+
     subtitleBtn.addEventListener('click', async () => {
         subtitleBtn.disabled = true;
         const btnText = subtitleBtn.querySelector('.btn-text');
@@ -77,31 +108,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-            if (!tab) {
-                showStatus(subtitleStatus, '未找到活动页面', 'error');
-                return;
-            }
+            if (!tab) { showStatus(subtitleStatus, '未找到活动页面', 'error'); return; }
 
             btnLoader.style.display = 'block';
 
-            const response = await chrome.tabs.sendMessage(tab.id, {
-                type: 'TOGGLE_SUBTITLE'
-            });
+            const response = await chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_SUBTITLE' });
 
             if (response.status === 'started') {
-                btnText.textContent = '关闭字幕';
+                btnText.textContent = '关闭识别';
                 subtitleBtn.classList.add('active');
                 showStatus(subtitleStatus, '语音识别中...', 'active');
             } else if (response.status === 'stopped') {
-                btnText.textContent = '开启字幕';
+                btnText.textContent = '开启识别';
                 subtitleBtn.classList.remove('active');
                 showStatus(subtitleStatus, '已关闭', '');
             } else if (response.status === 'error') {
                 showStatus(subtitleStatus, response.message, 'error');
             }
         } catch (err) {
-            console.error('字幕错误:', err);
+            console.error('语音字幕错误:', err);
             showStatus(subtitleStatus, '请刷新页面后重试', 'error');
         }
 
@@ -109,16 +134,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnLoader.style.display = 'none';
     });
 
-    // 设置按钮
-    settingsBtn.addEventListener('click', () => {
-        chrome.runtime.openOptionsPage();
-    });
+    // ====== 设置 ======
 
-    goSettingsBtn?.addEventListener('click', () => {
-        chrome.runtime.openOptionsPage();
-    });
+    settingsBtn.addEventListener('click', () => chrome.runtime.openOptionsPage());
+    goSettingsBtn?.addEventListener('click', () => chrome.runtime.openOptionsPage());
 
-    // --- 辅助函数 ---
+    // ====== 辅助函数 ======
 
     async function checkApiKey() {
         try {
@@ -126,11 +147,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!response.hasKey) {
                 apiKeyWarning.style.display = 'flex';
                 translateBtn.disabled = true;
+                captionBtn.disabled = true;
                 subtitleBtn.disabled = true;
             }
-        } catch {
-            // 忽略
-        }
+        } catch { }
     }
 
     async function updatePageStatus() {
@@ -138,34 +158,48 @@ document.addEventListener('DOMContentLoaded', async () => {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
             if (!tab) return;
 
-            // 获取翻译状态
+            // 网页翻译状态
             try {
-                const translateRes = await chrome.tabs.sendMessage(tab.id, {
-                    type: 'GET_PAGE_STATUS'
-                });
-                if (translateRes.isTranslated) {
+                const res = await chrome.tabs.sendMessage(tab.id, { type: 'GET_PAGE_STATUS' });
+                if (res.isTranslated) {
                     translateBtn.querySelector('.btn-text').textContent = '恢复原文';
                     translateBtn.classList.add('active');
                     showStatus(translateStatus, '已翻译', 'active');
                 }
-                if (translateRes.isTranslating) {
+                if (res.isTranslating) {
                     translateBtn.disabled = true;
                     showStatus(translateStatus, '正在翻译...', 'processing');
                 }
             } catch { }
 
-            // 获取字幕状态
+            // 字幕翻译状态
             try {
-                const subtitleRes = await chrome.tabs.sendMessage(tab.id, {
-                    type: 'GET_SUBTITLE_STATUS'
-                });
-                if (subtitleRes.isActive) {
-                    subtitleBtn.querySelector('.btn-text').textContent = '关闭字幕';
+                const res = await chrome.tabs.sendMessage(tab.id, { type: 'GET_CAPTION_STATUS' });
+                if (res.isActive) {
+                    captionBtn.querySelector('.btn-text').textContent = '关闭字幕';
+                    captionBtn.classList.add('active');
+                    if (res.progress.done < res.progress.total) {
+                        const pct = Math.round((res.progress.done / res.progress.total) * 100);
+                        showStatus(captionStatus, `翻译中 ${pct}%`, 'processing');
+                    } else {
+                        showStatus(captionStatus, '字幕翻译已完成', 'active');
+                    }
+                } else if (!res.hasVideo) {
+                    showStatus(captionStatus, '未检测到视频', '');
+                } else if (!res.hasCaptions) {
+                    showStatus(captionStatus, '未检测到字幕轨道', '');
+                }
+            } catch { }
+
+            // 语音字幕状态
+            try {
+                const res = await chrome.tabs.sendMessage(tab.id, { type: 'GET_SUBTITLE_STATUS' });
+                if (res.isActive) {
+                    subtitleBtn.querySelector('.btn-text').textContent = '关闭识别';
                     subtitleBtn.classList.add('active');
                     showStatus(subtitleStatus, '语音识别中...', 'active');
-                }
-                if (!subtitleRes.hasVideo) {
-                    showStatus(subtitleStatus, '当前页面未检测到视频', '');
+                } else if (!res.hasVideo) {
+                    showStatus(subtitleStatus, '未检测到视频', '');
                 }
             } catch { }
         } catch { }
@@ -176,7 +210,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         element.className = 'status-text' + (className ? ' ' + className : '');
     }
 
-    function listenForProgress() {
+    function listenForTranslateProgress() {
         const btnText = translateBtn.querySelector('.btn-text');
         const btnLoader = translateBtn.querySelector('.btn-loader');
 
@@ -184,9 +218,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (message.type === 'TRANSLATE_PROGRESS') {
                 const { translated, total } = message.data;
                 const pct = Math.round((translated / total) * 100);
-                showStatus(translateStatus, `翻译进度: ${pct}% (${translated}/${total})`, 'processing');
+                showStatus(translateStatus, `翻译进度: ${pct}%`, 'processing');
             } else if (message.type === 'TRANSLATE_COMPLETE') {
-                const { total, translated } = message.data;
+                const { translated } = message.data;
                 btnText.textContent = '恢复原文';
                 btnLoader.style.display = 'none';
                 translateBtn.classList.add('active');
@@ -195,7 +229,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 chrome.runtime.onMessage.removeListener(listener);
             }
         };
+        chrome.runtime.onMessage.addListener(listener);
+    }
 
+    function listenForCaptionProgress() {
+        const btnText = captionBtn.querySelector('.btn-text');
+        const btnLoader = captionBtn.querySelector('.btn-loader');
+
+        const listener = (message) => {
+            if (message.type === 'CAPTION_TRANSLATE_PROGRESS') {
+                const { done, total } = message.data;
+                const pct = Math.round((done / total) * 100);
+                showStatus(captionStatus, `字幕翻译中 ${pct}% (${done}/${total})`, 'processing');
+            } else if (message.type === 'CAPTION_TRANSLATE_COMPLETE') {
+                btnLoader.style.display = 'none';
+                showStatus(captionStatus, '字幕翻译完成 ✓', 'active');
+                chrome.runtime.onMessage.removeListener(listener);
+            }
+        };
         chrome.runtime.onMessage.addListener(listener);
     }
 });
