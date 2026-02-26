@@ -14,9 +14,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const settingsBtn = document.getElementById('settingsBtn');
     const goSettingsBtn = document.getElementById('goSettingsBtn');
     const apiKeyWarning = document.getElementById('apiKeyWarning');
+    const apiStatusDot = document.getElementById('apiStatusDot');
+    const apiStatusText = document.getElementById('apiStatusText');
+    const apiPingBtn = document.getElementById('apiPingBtn');
 
     // 检查 API Key
-    await checkApiKey();
+    const hasKey = await checkApiKey();
+
+    // 自动测试 API 连接（只在有 Key 时）
+    if (hasKey) {
+        runApiPing();
+    }
+
+    // 手动测试按钮
+    apiPingBtn.addEventListener('click', () => runApiPing());
 
     // 获取当前页面状态
     await updatePageStatus();
@@ -149,8 +160,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 translateBtn.disabled = true;
                 captionBtn.disabled = true;
                 subtitleBtn.disabled = true;
+                // 无 Key 时显示未配置状态
+                apiStatusDot.className = 'status-dot error';
+                apiStatusText.textContent = '未配置 API Key';
+                apiStatusText.className = 'api-status-text error';
+                return false;
             }
-        } catch { }
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     async function updatePageStatus() {
@@ -216,9 +235,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const listener = (message) => {
             if (message.type === 'TRANSLATE_PROGRESS') {
-                const { translated, total } = message.data;
+                const { translated, total, batchInfo } = message.data;
                 const pct = Math.round((translated / total) * 100);
-                showStatus(translateStatus, `翻译进度: ${pct}%`, 'processing');
+                const info = batchInfo ? ` · ${batchInfo}` : '';
+                showStatus(translateStatus, `翻译进度: ${pct}%${info}`, 'processing');
             } else if (message.type === 'TRANSLATE_COMPLETE') {
                 const { translated } = message.data;
                 btnText.textContent = '恢复原文';
@@ -227,9 +247,50 @@ document.addEventListener('DOMContentLoaded', async () => {
                 translateBtn.disabled = false;
                 showStatus(translateStatus, `已翻译 ${translated} 个文本`, 'active');
                 chrome.runtime.onMessage.removeListener(listener);
+            } else if (message.type === 'TRANSLATE_ERROR') {
+                const errMsg = message.data?.error || '翻译出错';
+                showStatus(translateStatus, errMsg, 'error');
+                // 不移除 listener，翻译仍在继续其他批次
             }
         };
         chrome.runtime.onMessage.addListener(listener);
+    }
+
+    /**
+     * API 连接测试
+     */
+    async function runApiPing() {
+        // 设置 UI 为测试中状态
+        apiPingBtn.disabled = true;
+        apiPingBtn.classList.add('spinning');
+        apiStatusDot.className = 'status-dot testing';
+        apiStatusText.textContent = '正在测试连接...';
+        apiStatusText.className = 'api-status-text testing';
+
+        try {
+            const result = await chrome.runtime.sendMessage({ type: 'API_PING' });
+
+            if (result.success) {
+                apiStatusDot.className = 'status-dot success';
+                apiStatusText.textContent = `连接正常 · 延迟 ${result.latency}ms`;
+                apiStatusText.className = 'api-status-text success';
+            } else {
+                apiStatusDot.className = 'status-dot error';
+                const errMsg = result.error || '连接失败';
+                // 截断过长的错误信息
+                const displayErr = errMsg.length > 40 ? errMsg.substring(0, 40) + '...' : errMsg;
+                apiStatusText.textContent = `连接失败 · ${displayErr}`;
+                apiStatusText.className = 'api-status-text error';
+                apiStatusText.title = errMsg; // 完整错误信息悬浮显示
+            }
+        } catch (err) {
+            apiStatusDot.className = 'status-dot error';
+            apiStatusText.textContent = '测试失败: ' + (err.message || '未知错误');
+            apiStatusText.className = 'api-status-text error';
+        }
+
+        apiPingBtn.disabled = false;
+        apiPingBtn.classList.remove('spinning');
     }
 
     function listenForCaptionProgress() {

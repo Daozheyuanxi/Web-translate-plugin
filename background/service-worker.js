@@ -3,7 +3,10 @@
  * 处理来自 Content Script 和 Popup 的消息，调用 Gemini API
  */
 
-import { translateTexts, translateSingle } from '../utils/api.js';
+import { translateTexts, translateSingle, getApiKey, translateApiError } from '../utils/api.js';
+
+const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
+const MODEL_NAME = 'gemini-2.5-flash';
 
 // 翻译缓存
 const translationCache = new Map();
@@ -36,11 +39,48 @@ async function handleMessage(message, sender) {
         case 'CHECK_API_KEY':
             return handleCheckApiKey();
 
+        case 'API_PING':
+            return handleApiPing();
+
         case 'GET_TRANSLATE_STATUS':
             return { isTranslating: false };
 
         default:
             return { error: '未知的消息类型: ' + message.type };
+    }
+}
+
+/**
+ * API 连接测试（ping）
+ * 发送一个极小的请求来测试连接和延迟
+ */
+async function handleApiPing() {
+    const startTime = Date.now();
+    try {
+        const apiKey = await getApiKey();
+        const url = `${GEMINI_API_BASE}/${MODEL_NAME}:generateContent?key=${apiKey}`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: 'Reply with only: OK' }] }],
+                generationConfig: { maxOutputTokens: 5 }
+            })
+        });
+
+        const latency = Date.now() - startTime;
+
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            const errMsg = translateApiError(response.status, data?.error?.message);
+            return { success: false, latency, error: errMsg };
+        }
+
+        return { success: true, latency };
+    } catch (error) {
+        const latency = Date.now() - startTime;
+        return { success: false, latency, error: error.message };
     }
 }
 

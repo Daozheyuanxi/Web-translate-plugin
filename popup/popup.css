@@ -290,6 +290,99 @@ body {
     }
 }
 
+/* --- API 连接状态栏 --- */
+.api-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    min-height: 36px;
+}
+
+.api-status-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: background 0.3s ease;
+}
+
+.status-dot.success {
+    background: #4ade80;
+    box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+}
+
+.status-dot.error {
+    background: #f87171;
+    box-shadow: 0 0 6px rgba(248, 113, 113, 0.5);
+}
+
+.status-dot.testing {
+    background: #818cf8;
+    animation: pulse-dot 1s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.api-status-text {
+    font-size: 11px;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.api-status-text.success { color: #4ade80; }
+.api-status-text.error { color: #f87171; }
+.api-status-text.testing { color: #a5b4fc; }
+
+.api-ping-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.05);
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.api-ping-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.api-ping-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.api-ping-btn.spinning svg {
+    animation: spin-refresh 0.8s linear infinite;
+}
+
+@keyframes spin-refresh {
+    to { transform: rotate(360deg); }
+}
+
 /* --- 底部 --- */
 .popup-footer {
     text-align: center;
