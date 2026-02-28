@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* ============================================
    智译 - 设置页面样式
    ============================================ */
@@ -226,4 +227,234 @@ body {
     font-size: 13px;
     font-weight: 500;
     color: #e2e8f0;
+=======
+/* ============================================
+   智译 - 设置页面样式
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', -apple-system, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.options-container {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* --- 头部 --- */
+.options-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.options-header .logo-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.options-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* --- 设置区块 --- */
+.settings-section {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 24px;
+}
+
+.settings-section h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* --- 表单 --- */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper input {
+    width: 100%;
+    height: 44px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 0 44px 0 14px;
+    color: #e2e8f0;
+    font-size: 14px;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.input-wrapper input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.input-wrapper input::placeholder {
+    color: #475569;
+}
+
+.toggle-btn {
+    position: absolute;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.toggle-btn:hover {
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.help-text {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.help-text a {
+    color: #818cf8;
+    text-decoration: none;
+}
+
+.help-text a:hover {
+    text-decoration: underline;
+}
+
+/* --- 保存按钮 --- */
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.save-btn {
+    height: 40px;
+    padding: 0 24px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border: none;
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.save-btn:hover {
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+    transform: translateY(-1px);
+}
+
+.save-btn:active {
+    transform: scale(0.97);
+}
+
+.save-status {
+    font-size: 13px;
+    font-weight: 500;
+    transition: opacity 0.3s;
+}
+
+.save-status.success {
+    color: #4ade80;
+}
+
+.save-status.error {
+    color: #f87171;
+}
+
+/* --- 关于信息 --- */
+.about-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.info-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: #e2e8f0;
+>>>>>>> c14eadc151a0cfc871e90e8c7436b7bc1c7b7a50
 }

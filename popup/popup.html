@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="zh-CN">
 
@@ -139,4 +140,147 @@
   <script src="popup.js"></script>
 </body>
 
+=======
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智译</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+  <div class="popup-container">
+    <!-- 头部 -->
+    <header class="popup-header">
+      <div class="logo-area">
+        <img src="../icons/icon48.png" alt="智译" class="logo-icon">
+        <div class="logo-text">
+          <h1>智译</h1>
+          <span class="version">v1.1.0</span>
+        </div>
+      </div>
+      <button id="settingsBtn" class="icon-btn" title="设置">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path
+            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42">
+          </path>
+        </svg>
+      </button>
+    </header>
+
+    <!-- API Key 提醒 -->
+    <div id="apiKeyWarning" class="warning-banner" style="display: none;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span>请先设置 Gemini API Key</span>
+      <button id="goSettingsBtn" class="link-btn">去设置</button>
+    </div>
+
+    <!-- API 连接状态 -->
+    <div id="apiStatusBar" class="api-status-bar">
+      <div class="api-status-left">
+        <span id="apiStatusDot" class="status-dot testing"></span>
+        <span id="apiStatusText" class="api-status-text">正在测试连接...</span>
+      </div>
+      <button id="apiPingBtn" class="api-ping-btn" title="重新测试">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- 1. 网页翻译 -->
+    <div class="feature-card">
+      <div class="card-header">
+        <div class="card-icon translate-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 8l6 10"></path>
+            <path d="M4 14l6-10"></path>
+            <path d="M2 5h12"></path>
+            <path d="M7 2v3"></path>
+            <path d="M22 22l-5-10-5 10"></path>
+            <path d="M14 18h6"></path>
+          </svg>
+        </div>
+        <div class="card-info">
+          <h2>网页翻译</h2>
+          <p id="translateStatus" class="status-text">就绪</p>
+        </div>
+      </div>
+      <button id="translateBtn" class="action-btn primary-btn">
+        <span class="btn-text">翻译页面</span>
+        <span class="btn-loader" style="display: none;"></span>
+      </button>
+    </div>
+
+    <!-- 2. 字幕翻译（有字幕的视频） -->
+    <div class="feature-card">
+      <div class="card-header">
+        <div class="card-icon caption-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 3H3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"></path>
+            <path d="M7 8h4"></path>
+            <path d="M7 12h8"></path>
+            <path d="M7 16h6"></path>
+            <circle cx="18" cy="12" r="2"></circle>
+          </svg>
+        </div>
+        <div class="card-info">
+          <h2>字幕翻译</h2>
+          <p class="card-desc">适用于有字幕的视频（YouTube 等）</p>
+          <p id="captionStatus" class="status-text">就绪</p>
+        </div>
+      </div>
+      <button id="captionBtn" class="action-btn caption-btn">
+        <span class="btn-text">翻译字幕</span>
+        <span class="btn-loader" style="display: none;"></span>
+      </button>
+    </div>
+
+    <!-- 3. 语音字幕（无字幕的视频） -->
+    <div class="feature-card">
+      <div class="card-header">
+        <div class="card-icon subtitle-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+        </div>
+        <div class="card-info">
+          <h2>语音字幕</h2>
+          <p class="card-desc">适用于无字幕的视频（语音识别）</p>
+          <p id="subtitleStatus" class="status-text">就绪</p>
+        </div>
+      </div>
+      <button id="subtitleBtn" class="action-btn secondary-btn">
+        <span class="btn-text">开启识别</span>
+        <span class="btn-loader" style="display: none;"></span>
+      </button>
+    </div>
+
+    <!-- 底部信息 -->
+    <footer class="popup-footer">
+      <span>Powered by Gemini 2.5 Flash</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+>>>>>>> c14eadc151a0cfc871e90e8c7436b7bc1c7b7a50
 </html>
